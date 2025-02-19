@@ -20,6 +20,7 @@ import com.example.proyecto.api.User
 import com.example.proyecto.database.ProductApplication
 import com.example.proyecto.databinding.FragmentFavoritesBinding
 import com.example.proyecto.databinding.FragmentHomeBinding
+import com.example.proyecto.databinding.FragmentSellBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,6 +45,8 @@ class FavoritesFragment : Fragment(), OnClickListener {
         savedInstanceState: Bundle?
     ): View? {
 
+        binding = FragmentFavoritesBinding.inflate(inflater, container, false)
+
         var products:List<ProductEntity> = listOf()
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -56,7 +59,7 @@ class FavoritesFragment : Fragment(), OnClickListener {
             }
         }
 
-        Thread.sleep(200)
+        Thread.sleep(400)
 
         gridLayoutManager = GridLayoutManager(context,2)
         productsAdapter = FavProductAdapter(products, this)

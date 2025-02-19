@@ -40,24 +40,24 @@ class MainActivity : AppCompatActivity(), ProductsListener {
 
         setContentView(binding.root)
 
-        val frgHome: HomeFragment =
-            HomeFragment.newInstance(user)
+        val fragHome = HomeFragment.newInstance(user).apply {
+            setProductsListener(this@MainActivity)
+        }
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragments, frgHome)
+            .replace(R.id.fragments, fragHome)
             .commit()
-        frgHome.setProductsListener(this)
 
         binding.bottomNavigation.setOnNavigationItemSelectedListener {
             it.isChecked = true
 
             when (it.itemId) {
                 R.id.nav_home -> {
-                    val fragHome: HomeFragment =
-                        HomeFragment.newInstance(user)
+                    val fragHome = HomeFragment.newInstance(user).apply {
+                        setProductsListener(this@MainActivity)
+                    }
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragments, fragHome)
                         .commit()
-                    frgHome.setProductsListener(this)
 
                     binding.title.text = getString(R.string.home)
                 }
