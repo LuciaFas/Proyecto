@@ -6,20 +6,25 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.res.ResourcesCompat
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.example.proyecto.R
-import java.util.Locale
+import com.example.proyecto.api.User
 
 class SettingsActivity : AppCompatActivity() {
+    private lateinit var user: User
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
 
+        user = intent.getSerializableExtra("User") as User
+
         if (savedInstanceState == null) {
+            val frgSettings: SettingsFragment =
+                SettingsFragment.newInstance(user)
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings, SettingsFragment())
+                .replace(R.id.settings, frgSettings)
                 .commit()
         }
 
@@ -29,45 +34,46 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
+        private var language: String? = null
+        private lateinit var user: User
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            arguments?.let {
+                user = it.getSerializable("User") as User
+            }
+        }
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-            findPreference<ListPreference>("language")?.setOnPreferenceChangeListener { _, newValue ->
-                updateLanguage(newValue as String)
-                true
-            }
-
-            findPreference<ListPreference>("font_preference")?.setOnPreferenceChangeListener { _, newValue ->
-                applyFont(newValue as String)
+            val preference = findPreference<ListPreference>("language")
+            preference?.setOnPreferenceChangeListener { _, newValue ->
+                language = newValue as String
+                saveChanges()
                 true
             }
         }
 
-        private fun updateLanguage(languageCode: String) {
-            val intent = Intent(requireContext(), RegisterActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+        private fun saveChanges() {
+            val prefs = requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
+            prefs.edit().putString("language", language).apply()
+
             requireActivity().finish()
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra("User", user)
+            startActivity(intent)
         }
 
-        private fun applyFont(fontName: String) {
-            val fontResId = when (fontName) {
-                "roboto" -> R.font.roboto
-                "montserrat" -> R.font.montserrat
-                else -> R.font.roboto
-            }
-
-            val typeface = ResourcesCompat.getFont(requireContext(), fontResId)
-            requireActivity().theme.applyStyle(getThemeFromFont(fontName), true)
-            activity?.recreate()
-        }
-
-        private fun getThemeFromFont(fontName: String): Int {
-            return when (fontName) {
-                "roboto" -> R.style.ProjectTheme_Roboto
-                "montserrat" -> R.style.ProjectTheme_Montserrat
-                else -> R.style.ProjectTheme_Roboto
-            }
+        companion object {
+            @JvmStatic
+            fun newInstance(u: User) =
+                SettingsFragment().apply {
+                    arguments = Bundle().apply {
+                        putSerializable("User", u)
+                    }
+                }
         }
     }
 

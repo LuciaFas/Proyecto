@@ -24,7 +24,6 @@ import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
 import com.example.proyecto.databinding.ActivityCategoriesBinding
 import com.example.proyecto.databinding.ActivityCategoryBinding
-import com.example.proyecto.utils.LocaleHelper
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
@@ -125,9 +124,6 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
-    override fun attachBaseContext(newBase: Context) {
-        val lang = LocaleHelper.getSavedLanguage(newBase)
-        super.attachBaseContext(LocaleHelper.setLocale(newBase, lang))
-    }
+
 
 }

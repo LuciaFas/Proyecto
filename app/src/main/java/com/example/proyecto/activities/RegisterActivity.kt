@@ -15,7 +15,6 @@ import com.example.proyecto.R
 import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
 import com.example.proyecto.databinding.ActivityRegisterBinding
-import com.example.proyecto.utils.LocaleHelper
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,7 +67,8 @@ class RegisterActivity : AppCompatActivity() {
                             name = txtName,
                             email = txtEmail,
                             password = txtPassword,
-                            poblacion = txtLocation
+                            poblacion = txtLocation,
+                            id = -1
                         )
 
                         val user = RetrofitInstance.api.registerUser(newUser)
@@ -89,7 +89,7 @@ class RegisterActivity : AppCompatActivity() {
                         Log.e("Registro", "Error HTTP ${e.code()}: $errorBody")
 
                         runOnUiThread {
-                             Toast.makeText(
+                            Toast.makeText(
                                 this@RegisterActivity,
                                 "Ha habido un error en las autenticaciones",
                                 Toast.LENGTH_SHORT
@@ -116,7 +116,17 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     override fun attachBaseContext(newBase: Context) {
-        val lang = LocaleHelper.getSavedLanguage(newBase)
-        super.attachBaseContext(LocaleHelper.setLocale(newBase, lang))
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(newBase)
+        val language = sharedPreferences.getString("language", "es") ?: "es"
+
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
     }
+
 }

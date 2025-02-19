@@ -2,6 +2,7 @@ package com.example.proyecto.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.TextView
@@ -22,8 +23,8 @@ import com.example.proyecto.fragments.HomeFragment
 import com.example.proyecto.adapters.ProductsListener
 import com.example.proyecto.fragments.ProfileFragment
 import com.example.proyecto.fragments.SellFragment
-import com.example.proyecto.utils.LocaleHelper
 import com.google.android.material.navigation.NavigationView
+import java.util.Locale
 
 class MainActivity : AppCompatActivity(), ProductsListener {
     private lateinit var binding: ActivityMainBinding
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity(), ProductsListener {
     private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setLanguage()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -115,6 +117,7 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                 }
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
+                    intent.putExtra("User", user)
                     startActivity(intent)
                 }
                 R.id.nav_premium -> {
@@ -154,8 +157,22 @@ class MainActivity : AppCompatActivity(), ProductsListener {
         }
     }
 
-    override fun attachBaseContext(newBase: Context) {
-        val lang = LocaleHelper.getSavedLanguage(newBase)
-        super.attachBaseContext(LocaleHelper.setLocale(newBase, lang))
+    private fun setLanguage() {
+        val preferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val language = preferences.getString("language", "es") ?: "es"
+        changeLanguage(this, language)
+    }
+
+    private fun changeLanguage(context: Context, language: String) {
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+
+        val preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        preferences.edit().putString("language", language).apply()
     }
 }

@@ -2,6 +2,7 @@ package com.example.proyecto.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -9,14 +10,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.preference.PreferenceManager
 import com.example.proyecto.R
 import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.databinding.ActivityLogInBinding
-import com.example.proyecto.utils.LocaleHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.util.Locale
 
 class LogInActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLogInBinding
@@ -86,7 +88,17 @@ class LogInActivity : AppCompatActivity() {
     }
 
     override fun attachBaseContext(newBase: Context) {
-        val lang = LocaleHelper.getSavedLanguage(newBase)
-        super.attachBaseContext(LocaleHelper.setLocale(newBase, lang))
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(newBase)
+        val language = sharedPreferences.getString("language", "es") ?: "es"
+
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
     }
+
 }

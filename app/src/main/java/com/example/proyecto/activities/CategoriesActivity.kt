@@ -12,13 +12,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.proyecto.R
 import com.example.proyecto.adapters.CategoryAdapter
 import com.example.proyecto.adapters.OnClickListener
-import com.example.proyecto.api.Product
 import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
 import com.example.proyecto.databinding.ActivityCategoriesBinding
-import com.example.proyecto.adapters.ProductsListener
 import com.example.proyecto.api.Category
-import com.example.proyecto.utils.LocaleHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,8 +80,5 @@ class CategoriesActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
-    override fun attachBaseContext(newBase: Context) {
-        val lang = LocaleHelper.getSavedLanguage(newBase)
-        super.attachBaseContext(LocaleHelper.setLocale(newBase, lang))
-    }
+
 }
