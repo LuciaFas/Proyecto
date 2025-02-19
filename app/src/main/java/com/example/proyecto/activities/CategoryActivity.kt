@@ -37,7 +37,6 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
     private lateinit var productsAdapter: ProductsAdapter
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var category: Category
-    private lateinit var searchView: androidx.appcompat.widget.SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,21 +80,6 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         chipPrice.setOnClickListener {
             showPriceDialog(chipPrice)
         }
-
-        searchView = binding.searchBarCat.findViewById(R.id.searchView)
-
-        searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                // Acción cuando el usuario envía la búsqueda
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // Acción cuando el usuario escribe en el campo de búsqueda
-                return true
-            }
-        })
-
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
