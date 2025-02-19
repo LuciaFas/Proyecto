@@ -18,13 +18,16 @@ import com.example.proyecto.adapters.OnClickListener
 import com.example.proyecto.adapters.ProductsAdapter
 import com.example.proyecto.adapters.ProductsListener
 import com.example.proyecto.api.Product
+import com.example.proyecto.api.ProductEntity
 import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
+import com.example.proyecto.database.ProductApplication
 import com.example.proyecto.databinding.FragmentHomeBinding
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 class HomeFragment : Fragment(), OnClickListener {
@@ -33,6 +36,7 @@ class HomeFragment : Fragment(), OnClickListener {
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var listener: ProductsListener
     private lateinit var user: User
+    private var products: List<Product> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,20 +59,6 @@ class HomeFragment : Fragment(), OnClickListener {
             startActivity(intent)
         }
 
-        var products:List<Product> = listOf()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                products = RetrofitInstance.api.listProducts()
-
-            } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                Log.e("Registro", "Error HTTP ${e.code()}: $errorBody")
-            }
-        }
-
-        Thread.sleep(200)
-
         gridLayoutManager = GridLayoutManager(context,2)
         productsAdapter = ProductsAdapter(products, this)
 
@@ -77,7 +67,30 @@ class HomeFragment : Fragment(), OnClickListener {
             adapter = productsAdapter
         }
 
+        loadProducts()
+
         return binding.root
+    }
+
+    private fun loadProducts() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val productsApi = RetrofitInstance.api.listProducts()
+
+                withContext(Dispatchers.Main) {
+                    products = productsApi
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadProducts()
     }
 
     fun setProductsListener(listener: ProductsListener) {

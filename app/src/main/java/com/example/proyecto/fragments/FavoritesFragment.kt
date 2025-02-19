@@ -24,14 +24,15 @@ import com.example.proyecto.databinding.FragmentSellBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 class FavoritesFragment : Fragment(), OnClickListener {
     private lateinit var binding: FragmentFavoritesBinding
     private lateinit var productsAdapter: FavProductAdapter
     private lateinit var gridLayoutManager: GridLayoutManager
-    private lateinit var listener: ProductsListener
     private lateinit var user: User
+    private var products: List<ProductEntity> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,25 +44,11 @@ class FavoritesFragment : Fragment(), OnClickListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         binding = FragmentFavoritesBinding.inflate(inflater, container, false)
 
-        var products:List<ProductEntity> = listOf()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                products = ProductApplication.database.productDao().getAllProduct()
-
-            } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                Log.e("Favoritos", "Error HTTP ${e.code()}: $errorBody")
-            }
-        }
-
-        Thread.sleep(400)
-
-        gridLayoutManager = GridLayoutManager(context,2)
+        gridLayoutManager = GridLayoutManager(context, 2)
         productsAdapter = FavProductAdapter(products, this)
 
         binding.recyclerProductsFav.apply {
@@ -69,8 +56,25 @@ class FavoritesFragment : Fragment(), OnClickListener {
             adapter = productsAdapter
         }
 
+        loadProducts()
 
-        return inflater.inflate(R.layout.fragment_favorites, container, false)
+        return binding.root
+    }
+
+    private fun loadProducts() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val productosRoom = ProductApplication.database.productDao().getAllProduct()
+
+                withContext(Dispatchers.Main) {
+                    products = productosRoom
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("Favoritos", "Error HTTP ${e.code()}: $errorBody")
+            }
+        }
     }
 
     companion object {
@@ -83,16 +87,23 @@ class FavoritesFragment : Fragment(), OnClickListener {
             }
     }
 
-    fun setProductsListener(listener: ProductsListener) {
-        this.listener = listener
-    }
-
     override fun onClick(obj: Any) {
-        val product: Product = obj as Product
+        var product = obj as ProductEntity
 
-        if (listener != null) {
-            listener.onProductSelected(product)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                ProductApplication.database.productDao().deleteProduct(product)
+
+                val productosRoom = ProductApplication.database.productDao().getAllProduct()
+
+                withContext(Dispatchers.Main) {
+                    products = productosRoom
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("Favoritos", "Error HTTP ${e.code()}: $errorBody")
+            }
         }
     }
-
 }

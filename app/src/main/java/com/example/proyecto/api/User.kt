@@ -11,8 +11,8 @@ data class UsuarioResponse(
 
 data class User(
     val id:Int,
-    val name:String,
+    var name:String,
     val email:String,
-    val password:String,
-    val poblacion:String
+    var password:String,
+    var poblacion:String
 ) : Serializable

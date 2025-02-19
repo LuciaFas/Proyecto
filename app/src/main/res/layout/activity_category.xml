@@ -42,8 +42,11 @@
         android:id="@+id/searchBarCat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/iconBar"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/iconBar"
+        app:layout_constraintStart_toStartOf="parent">
+    </com.google.android.material.search.SearchBar>
+
+
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filters"

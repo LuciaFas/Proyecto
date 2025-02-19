@@ -2,11 +2,13 @@ package com.example.proyecto.api
 
 import okhttp3.MultipartBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -31,14 +33,14 @@ interface ApiGrupoAService {
     @GET("categorias")
     suspend fun listCategories(): List<Category>
 
-    // ***********  Cambiar  ************//
-    @DELETE("productos/eliminarProducto")
-    suspend fun deleteProducto(@Body product: Product): Void
+    @DELETE("productos/{id}")
+    suspend fun deleteProducto(@Path("id") productId: Int): Response<Void>
 
-    // ***********  Cambiar  ************//
-    @GET("productos/listarProductosPorCategoria")
-    suspend fun listProductsCategory(@Body category: Category): List<Product>
+    @GET("productos/filtrarPorCategoria/{nomCategoria}")
+    suspend fun listProductsCategory(@Path("nomCategoria") nomCategoria: String): List<Product>
 
+    @PUT("usuarios")
+    suspend fun modifyUser(@Body user: User): User
 
     @Multipart
     @POST("uploads/imagen/{articuloId}")
@@ -50,5 +52,4 @@ interface ApiGrupoAService {
     @GET("uploads/{id}")
     fun cargarImagen(@Path("id") id: Int): String
 
-    //@PUT()
 }

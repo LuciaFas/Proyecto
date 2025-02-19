@@ -68,7 +68,6 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragments, frgFav)
                         .commit()
-                    frgFav.setProductsListener(this)
 
                     binding.title.text = getString(R.string.favorites)
                 }
@@ -112,8 +111,10 @@ class MainActivity : AppCompatActivity(), ProductsListener {
 
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.nav_home -> {
-
+                R.id.nav_cuenta -> {
+                    val intent = Intent(this, ModifyUserActivity::class.java)
+                    intent.putExtra("User", user)
+                    startActivity(intent)
                 }
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
@@ -131,6 +132,12 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                         }
                         .setNegativeButton("Cancelar", null)
                         .show()
+                }
+                R.id.nav_log_out -> {
+                    val intent = Intent(this, LogInActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    startActivity(intent)
+                    finish()
                 }
             }
             drawerLayout.closeDrawer(GravityCompat.START)

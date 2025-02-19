@@ -7,10 +7,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.proyecto.R
 import com.example.proyecto.api.Product
+import com.example.proyecto.api.ProductEntity
 import com.example.proyecto.databinding.ItemProductBinding
 import com.squareup.picasso.Picasso
 
-class ProductsAdapter (private val products: List<Product>?, private val listener: OnClickListener):
+class ProductsAdapter (private var products: List<Product>?, private val listener: OnClickListener):
     RecyclerView.Adapter<ProductsAdapter.ViewHolder>() {
 
     private lateinit var context: Context
@@ -34,6 +35,11 @@ class ProductsAdapter (private val products: List<Product>?, private val listene
         return products!!.size
     }
 
+    fun updateData(newProducts: List<Product>) {
+        products = newProducts
+        notifyDataSetChanged()
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val product = products?.get(position) as Product
 
@@ -47,4 +53,6 @@ class ProductsAdapter (private val products: List<Product>?, private val listene
             binding.txtName.text = product.name
         }
     }
+
+
 }

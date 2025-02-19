@@ -9,7 +9,7 @@
         android:title="Cuenta">
         <menu>
             <item
-                android:id="@+id/nav_home"
+                android:id="@+id/nav_cuenta"
                 android:icon="@drawable/ic_edit"
                 android:title="@string/edit_account" />
             <item

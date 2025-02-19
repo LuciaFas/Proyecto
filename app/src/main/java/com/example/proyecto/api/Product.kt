@@ -41,7 +41,8 @@ class ProductEntity (
     @ColumnInfo val category:CategoryEntity,
     @ColumnInfo val price:Float,
     @ColumnInfo val user:UserEntity,
-    @ColumnInfo val antiquity:String
+    @ColumnInfo val antiquity:String,
+    @ColumnInfo val serverId: Int
 
 ): Serializable
 
