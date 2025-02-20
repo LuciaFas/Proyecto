@@ -1,31 +1,28 @@
 package com.example.proyecto.activities
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.SearchView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.proyecto.R
-import com.example.proyecto.adapters.CategoryAdapter
 import com.example.proyecto.adapters.OnClickListener
 import com.example.proyecto.adapters.ProductsAdapter
-import com.example.proyecto.adapters.ProductsListener
 import com.example.proyecto.api.Category
 import com.example.proyecto.api.Product
 import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
-import com.example.proyecto.databinding.ActivityCategoriesBinding
 import com.example.proyecto.databinding.ActivityCategoryBinding
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.google.android.material.search.SearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +36,7 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var category: Category
     private lateinit var user: User
+    private lateinit var searchView: SearchView
     private var products: List<Product> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +49,32 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         user = intent.getSerializableExtra("User") as User
 
         setContentView(binding.root)
+
+        searchView = binding.searchBar
+        searchView.clearFocus()
+
+        searchView.setOnClickListener {
+            searchView.isIconified = false
+        }
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                searchByName(query)
+
+                searchView.clearFocus()
+
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+        searchView.setOnCloseListener {
+            searchByName(searchView.query.toString())
+
+            false
+        }
 
         val iconBack = binding.icnBack
 
@@ -96,15 +120,7 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
                 if (price.isNotEmpty()) {
                     chip.text = "Precio: $$price"
 
-                    /*
-                    val productsFiltered = filterByPrice(price.toFloat())
-                    productsAdapter = ProductsAdapter(productsFiltered, this)
-
-                    binding.recyclerProducts.apply {
-                        layoutManager = gridLayoutManager
-                        adapter = productsAdapter
-                    }
-                    */
+                    filterByPrice(price.toDouble())
                 }
             }
             .setNegativeButton("Cancelar", null)
@@ -119,6 +135,28 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
+    private fun searchByName(query: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                products = RetrofitInstance.api.listProductsCategory(
+                    category.name,
+                    name = query,
+                    price = null
+                )
+
+                val filteredProducts = products.filter { it.usuario.id != user.id }
+
+                withContext(Dispatchers.Main) {
+                    products = filteredProducts
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
+            }
+        }
+    }
+
     private fun loadProducts() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -126,6 +164,28 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
                     category.name,
                     name = null,
                     price = null
+                )
+
+                val filteredProducts = products.filter { it.usuario.id != user.id }
+
+                withContext(Dispatchers.Main) {
+                    products = filteredProducts
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
+            }
+        }
+    }
+
+    private fun filterByPrice(price: Double) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                products = RetrofitInstance.api.listProductsCategory(
+                    category.name,
+                    name = null,
+                    price = price
                 )
 
                 val filteredProducts = products.filter { it.usuario.id != user.id }
