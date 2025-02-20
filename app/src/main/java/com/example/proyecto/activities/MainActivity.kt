@@ -3,9 +3,11 @@ package com.example.proyecto.activities
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -25,10 +27,12 @@ import com.example.proyecto.adapters.ProductsListener
 import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.fragments.ProfileFragment
 import com.example.proyecto.fragments.SellFragment
+import com.google.android.material.chip.Chip
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.util.Locale
 
@@ -136,7 +140,14 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                         .setPositiveButton("Si") { _, _ ->
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
-                                    RetrofitInstance.api.odoo(user.id)
+                                    val response = RetrofitInstance.api.odoo(user)
+                                    if (response.isSuccessful) {
+                                        val responseBody = response.body()
+                                        println(responseBody)
+                                    } else {
+                                        Log.e("Odoo", "Error HTTP: ${response.code()} - ${response.message()}")
+                                    }
+                                    Log.e("Odoo", "Funciona")
 
                                     runOnUiThread {
                                         Toast.makeText(
@@ -149,6 +160,9 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                                 } catch (e: HttpException) {
                                     val errorBody = e.response()?.errorBody()?.string()
                                     Log.e("Odoo", "Error HTTP ${e.code()}: $errorBody")
+
+                                } catch (e: Exception) {
+                                    factureDialog()
                                 }
                             }
                         }
@@ -187,7 +201,7 @@ class MainActivity : AppCompatActivity(), ProductsListener {
     }
 
     private fun setPreferences() {
-        val preferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val preferences = getSharedPreferences("settings", MODE_PRIVATE)
 
         val language = preferences.getString("language", "es") ?: "es"
         changeLanguage(this, language)
@@ -205,9 +219,36 @@ class MainActivity : AppCompatActivity(), ProductsListener {
 
         context.resources.updateConfiguration(config, context.resources.displayMetrics)
 
-        val preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val preferences = context.getSharedPreferences("settings", MODE_PRIVATE)
         preferences.edit().putString("language", language).apply()
     }
+
+    private fun factureDialog() {
+        runOnUiThread {
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle("¿Quieres ver la factura?")
+                .setPositiveButton("Sí") { _, _ ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val facture = RetrofitInstance.api.odooFacture()
+                            val url = "http://40.89.147.152:8069/report/html/account.report_invoice/${facture}"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            startActivity(intent)
+
+                        } catch (e: HttpException) {
+                            val errorBody = e.response()?.errorBody()?.string()
+                            Log.e("Odoo", "Error HTTP ${e.code()}: $errorBody")
+
+                        } catch (e: Exception) {
+                            factureDialog()
+                        }
+                    }
+                }
+                .setNegativeButton("Cancelar", null)
+                .show()
+        }
+    }
+
 
     private fun applyFont(font: String) {
         when (font) {

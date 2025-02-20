@@ -5,6 +5,8 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -33,8 +35,11 @@ interface ApiGrupoAService {
     @GET("categorias")
     suspend fun listCategories(): List<Category>
 
-    @GET("report/pdf/account.report_invoice/{id}")
-    suspend fun odoo(@Path("id") productId: Int): Response<Void>
+    @GET("odoo")
+    suspend fun odooFacture(): String
+
+    @POST("odoo/create")
+    suspend fun odoo( @Body user: User): Response<String>
 
     @DELETE("productos/{id}")
     suspend fun deleteProducto(@Path("id") userId: Int): Response<Void>
@@ -45,7 +50,6 @@ interface ApiGrupoAService {
         @Query("name") name: String?,
         @Query("price") price: Double?
     ): List<Product>
-
 
     @PUT("usuarios")
     suspend fun modifyUser(@Body user: User): User
