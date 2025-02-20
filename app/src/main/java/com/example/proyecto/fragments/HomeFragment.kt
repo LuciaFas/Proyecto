@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.GravityCompat
@@ -36,6 +37,8 @@ class HomeFragment : Fragment(), OnClickListener {
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var listener: ProductsListener
     private lateinit var user: User
+    private lateinit var searchView: SearchView
+    private var queryName: String? = null
     private var products: List<Product> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +70,45 @@ class HomeFragment : Fragment(), OnClickListener {
             adapter = productsAdapter
         }
 
+        searchView = binding.searchBar
+        searchView.clearFocus()
+
+        searchView.setOnClickListener {
+            searchView.isIconified = false
+        }
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                if (query.isNotEmpty()) {
+                    queryName = query
+                } else {
+                    queryName = null
+                }
+
+                searchView.clearFocus()
+
+                searchName()
+
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrEmpty()) {
+                    queryName = null
+                    searchName()
+                }
+                return false
+            }
+        })
+
+        searchView.setOnCloseListener {
+            queryName = null
+
+            searchName()
+
+            false
+        }
+
         loadProducts()
 
         return binding.root
@@ -86,6 +128,28 @@ class HomeFragment : Fragment(), OnClickListener {
             } catch (e: HttpException) {
                 val errorBody = e.response()?.errorBody()?.string()
                 Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
+            }
+        }
+    }
+
+    private fun searchName() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                products = RetrofitInstance.api.listProductsCategory(
+                    nomCategoria = null,
+                    name = queryName,
+                    price = null
+                )
+
+                val filteredProducts = products.filter { it.usuario.id != user.id }
+
+                withContext(Dispatchers.Main) {
+                    products = filteredProducts
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("CategoryActivity", "Error HTTP ${e.code()}: $errorBody")
             }
         }
     }

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.SearchView
 import androidx.activity.enableEdgeToEdge
@@ -12,7 +11,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.proyecto.R
 import com.example.proyecto.adapters.OnClickListener
@@ -23,7 +21,6 @@ import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
 import com.example.proyecto.databinding.ActivityCategoryBinding
 import com.google.android.material.chip.Chip
-import com.google.android.material.search.SearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,6 +79,7 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
                 return false
             }
         })
+
         searchView.setOnCloseListener {
             queryName = null
 
@@ -111,7 +109,13 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         val chipPrice = findViewById<Chip>(R.id.chipPrice)
 
         chipPrice.setOnClickListener {
-            showPriceDialog(chipPrice)
+            if (chipPrice.isChecked) {
+                showPriceDialog(chipPrice)
+            } else {
+                chipPrice.text = "Precio"
+                queryPrice = null
+                applyFilters()
+            }
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -132,7 +136,7 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
             .setPositiveButton("Aplicar") { _, _ ->
                 val price = editText.text.toString()
                 if (price.isNotEmpty()) {
-                    chip.text = "Precio: $$price"
+                    chip.text = "Precio: ${price}€"
 
                     queryPrice = price.toDouble()
 
@@ -155,7 +159,7 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 products = RetrofitInstance.api.listProductsCategory(
-                    category.name,
+                    nomCategoria = category.name,
                     name = queryName,
                     price = queryPrice
                 )
