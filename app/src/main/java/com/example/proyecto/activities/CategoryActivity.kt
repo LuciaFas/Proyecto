@@ -30,6 +30,7 @@ import com.google.android.material.search.SearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 class CategoryActivity : AppCompatActivity(), OnClickListener {
@@ -37,43 +38,37 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
     private lateinit var productsAdapter: ProductsAdapter
     private lateinit var gridLayoutManager: GridLayoutManager
     private lateinit var category: Category
+    private lateinit var user: User
+    private var products: List<Product> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         binding = ActivityCategoryBinding.inflate(layoutInflater)
+
         category = intent.getSerializableExtra("Category") as Category
+        user = intent.getSerializableExtra("User") as User
 
         setContentView(binding.root)
 
         val iconBack = binding.icnBack
 
         iconBack.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, CategoriesActivity::class.java)
+            intent.putExtra("User", user)
             startActivity(intent)
         }
 
         gridLayoutManager = GridLayoutManager(this,2)
-
-        var products:List<Product> = listOf()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                products = RetrofitInstance.api.listProductsCategory(category.name)
-
-            } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                Log.e("Category", "Error HTTP ${e.code()}: $errorBody")
-            }
-        }
-
         productsAdapter = ProductsAdapter(products, this)
 
         binding.recyclerProducts.apply {
             layoutManager = gridLayoutManager
             adapter = productsAdapter
         }
+
+        loadProducts()
 
         val chipPrice = findViewById<Chip>(R.id.chipPrice)
 
@@ -124,6 +119,26 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
+    private fun loadProducts() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                products = RetrofitInstance.api.listProductsCategory(
+                    category.name,
+                    name = null,
+                    price = null
+                )
 
+                val filteredProducts = products.filter { it.usuario.id != user.id }
+
+                withContext(Dispatchers.Main) {
+                    products = filteredProducts
+                    productsAdapter.updateData(products)
+                }
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string()
+                Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
+            }
+        }
+    }
 
 }

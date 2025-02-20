@@ -47,5 +47,6 @@
     <string name="location">Poblacion</string>
     <string name="password">Contraseña</string>
     <string name="update">Actualizar</string>
+    <string name="user_profile">Perfil del usuario</string>
 
 </resources>

@@ -36,8 +36,13 @@ interface ApiGrupoAService {
     @DELETE("productos/{id}")
     suspend fun deleteProducto(@Path("id") productId: Int): Response<Void>
 
-    @GET("productos/filtrarPorCategoria/{nomCategoria}")
-    suspend fun listProductsCategory(@Path("nomCategoria") nomCategoria: String): List<Product>
+    @GET("productos/filtrar")
+    suspend fun listProductsCategory(
+        @Query("nomCategoria") nomCategoria: String?,
+        @Query("name") name: String?,
+        @Query("price") price: Double?
+    ): List<Product>
+
 
     @PUT("usuarios")
     suspend fun modifyUser(@Body user: User): User

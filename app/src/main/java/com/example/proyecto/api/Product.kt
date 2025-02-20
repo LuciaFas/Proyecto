@@ -48,13 +48,14 @@ class ProductEntity (
 
 @Entity(tableName = "categories")
 data class CategoryEntity(
-    @ColumnInfo val id:Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo val name:String,
     @ColumnInfo val description:String
 ): Serializable
 
 @Entity(tableName = "users")
 data class UserEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo val name:String,
     @ColumnInfo val email:String,
     @ColumnInfo val password:String,

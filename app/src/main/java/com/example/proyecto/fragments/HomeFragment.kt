@@ -75,10 +75,12 @@ class HomeFragment : Fragment(), OnClickListener {
     private fun loadProducts() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val productsApi = RetrofitInstance.api.listProducts()
+                val allProducts = RetrofitInstance.api.listProducts()
+
+                val filteredProducts = allProducts.filter { it.usuario.id != user.id }
 
                 withContext(Dispatchers.Main) {
-                    products = productsApi
+                    products = filteredProducts
                     productsAdapter.updateData(products)
                 }
             } catch (e: HttpException) {

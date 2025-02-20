@@ -19,8 +19,6 @@ import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.api.User
 import com.example.proyecto.database.ProductApplication
 import com.example.proyecto.databinding.FragmentFavoritesBinding
-import com.example.proyecto.databinding.FragmentHomeBinding
-import com.example.proyecto.databinding.FragmentSellBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
