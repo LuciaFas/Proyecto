@@ -140,15 +140,7 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                         .setPositiveButton("Si") { _, _ ->
                             CoroutineScope(Dispatchers.IO).launch {
                                 try {
-                                    val response = RetrofitInstance.api.odoo(user)
-                                    if (response.isSuccessful) {
-                                        val responseBody = response.body()
-                                        println(responseBody)
-                                    } else {
-                                        Log.e("Odoo", "Error HTTP: ${response.code()} - ${response.message()}")
-                                    }
-                                    Log.e("Odoo", "Funciona")
-
+                                    RetrofitInstance.api.odoo(user)
                                     runOnUiThread {
                                         Toast.makeText(
                                             this@MainActivity,
@@ -162,8 +154,9 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                                     Log.e("Odoo", "Error HTTP ${e.code()}: $errorBody")
 
                                 } catch (e: Exception) {
-                                    factureDialog()
                                 }
+
+                                factureDialog()
                             }
                         }
                         .setNegativeButton("Cancelar", null)
