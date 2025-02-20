@@ -9,13 +9,13 @@
         <item>en</item>
     </string-array>
     <string-array name="fonts">
-        <item>Default</item>
+        <item>Space Mono</item>
         <item>Roboto</item>
         <item>Montserrat</item>
     </string-array>
 
     <string-array name="font_values">
-        <item>default</item>
+        <item>space_mono</item>
         <item>roboto</item>
         <item>montserrat</item>
     </string-array>

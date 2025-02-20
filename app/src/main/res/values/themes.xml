@@ -23,4 +23,8 @@
         <item name="android:fontFamily">@font/montserrat</item>
     </style>
 
+    <style name="ProjectTheme.SpaceMono">
+        <item name="android:fontFamily">@font/space_mono</item>
+    </style>
+
 </resources>

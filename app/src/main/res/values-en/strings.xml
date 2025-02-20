@@ -49,5 +49,9 @@
     <string name="password">Password</string>
     <string name="update">Update</string>
     <string name="user_profile">User Profile</string>
+    <string name="choose_the_language">Choose the language</string>
+    <string name="change_the_app_language">Change the app language</string>
+    <string name="choose_the_font">Choose the font</string>
+    <string name="change_the_font_for_the_app">Change the font for the app</string>
 
 </resources>

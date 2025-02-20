@@ -38,6 +38,8 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
     private lateinit var user: User
     private lateinit var searchView: SearchView
     private var products: List<Product> = listOf()
+    private var queryName: String? = null
+    private var queryPrice: Double? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,19 +61,31 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                searchByName(query)
+                if (query.isNotEmpty()) {
+                    queryName = query
+                } else {
+                    queryName = null
+                }
 
                 searchView.clearFocus()
+
+                applyFilters()
 
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrEmpty()) {
+                    queryName = null
+                    applyFilters()
+                }
                 return false
             }
         })
         searchView.setOnCloseListener {
-            searchByName(searchView.query.toString())
+            queryName = null
+
+            applyFilters()
 
             false
         }
@@ -120,7 +134,9 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
                 if (price.isNotEmpty()) {
                     chip.text = "Precio: $$price"
 
-                    filterByPrice(price.toDouble())
+                    queryPrice = price.toDouble()
+
+                    applyFilters()
                 }
             }
             .setNegativeButton("Cancelar", null)
@@ -135,13 +151,13 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
-    private fun searchByName(query: String) {
+    private fun applyFilters() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 products = RetrofitInstance.api.listProductsCategory(
                     category.name,
-                    name = query,
-                    price = null
+                    name = queryName,
+                    price = queryPrice
                 )
 
                 val filteredProducts = products.filter { it.usuario.id != user.id }
@@ -152,10 +168,11 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
                 }
             } catch (e: HttpException) {
                 val errorBody = e.response()?.errorBody()?.string()
-                Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
+                Log.e("CategoryActivity", "Error HTTP ${e.code()}: $errorBody")
             }
         }
     }
+
 
     private fun loadProducts() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -164,28 +181,6 @@ class CategoryActivity : AppCompatActivity(), OnClickListener {
                     category.name,
                     name = null,
                     price = null
-                )
-
-                val filteredProducts = products.filter { it.usuario.id != user.id }
-
-                withContext(Dispatchers.Main) {
-                    products = filteredProducts
-                    productsAdapter.updateData(products)
-                }
-            } catch (e: HttpException) {
-                val errorBody = e.response()?.errorBody()?.string()
-                Log.e("Home", "Error HTTP ${e.code()}: $errorBody")
-            }
-        }
-    }
-
-    private fun filterByPrice(price: Double) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                products = RetrofitInstance.api.listProductsCategory(
-                    category.name,
-                    name = null,
-                    price = price
                 )
 
                 val filteredProducts = products.filter { it.usuario.id != user.id }

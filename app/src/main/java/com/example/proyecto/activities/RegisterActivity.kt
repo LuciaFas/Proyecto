@@ -126,6 +126,14 @@ class RegisterActivity : AppCompatActivity() {
         config.setLocale(locale)
 
         val context = newBase.createConfigurationContext(config)
+
+        val font = sharedPreferences.getString("font", "roboto") ?: "roboto"
+        when (font) {
+            "roboto" -> context.setTheme(R.style.ProjectTheme_Roboto)
+            "montserrat" -> context.setTheme(R.style.ProjectTheme_Montserrat)
+            "space_mono" -> context.setTheme(R.style.ProjectTheme_SpaceMono)
+        }
+
         super.attachBaseContext(context)
     }
 

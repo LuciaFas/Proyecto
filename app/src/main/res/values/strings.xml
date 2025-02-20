@@ -48,5 +48,9 @@
     <string name="password">Contraseña</string>
     <string name="update">Actualizar</string>
     <string name="user_profile">Perfil del usuario</string>
+    <string name="choose_the_language">Elige el idioma</string>
+    <string name="change_the_app_language">Cambiar el idioma de la app</string>
+    <string name="choose_the_font">Elige el estilo</string>
+    <string name="change_the_font_for_the_app">Cambiar la letra de la app</string>
 
 </resources>

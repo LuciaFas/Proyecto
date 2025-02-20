@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), ProductsListener {
     private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setLanguage()
+        setPreferences()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -164,10 +164,14 @@ class MainActivity : AppCompatActivity(), ProductsListener {
         }
     }
 
-    private fun setLanguage() {
+    private fun setPreferences() {
         val preferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
+
         val language = preferences.getString("language", "es") ?: "es"
         changeLanguage(this, language)
+
+        val font = preferences.getString("font", "default") ?: "default"
+        applyFont(font)
     }
 
     private fun changeLanguage(context: Context, language: String) {
@@ -181,5 +185,13 @@ class MainActivity : AppCompatActivity(), ProductsListener {
 
         val preferences = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
         preferences.edit().putString("language", language).apply()
+    }
+
+    private fun applyFont(font: String) {
+        when (font) {
+            "roboto" -> setTheme(R.style.ProjectTheme_Roboto)
+            "montserrat" -> setTheme(R.style.ProjectTheme_Montserrat)
+            "space_mono" -> setTheme(R.style.ProjectTheme_SpaceMono)
+        }
     }
 }
