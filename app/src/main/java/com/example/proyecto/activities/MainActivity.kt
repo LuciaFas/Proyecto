@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
@@ -21,9 +22,14 @@ import com.example.proyecto.databinding.ActivityMainBinding
 import com.example.proyecto.fragments.FavoritesFragment
 import com.example.proyecto.fragments.HomeFragment
 import com.example.proyecto.adapters.ProductsListener
+import com.example.proyecto.api.RetrofitInstance
 import com.example.proyecto.fragments.ProfileFragment
 import com.example.proyecto.fragments.SellFragment
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), ProductsListener {
@@ -128,7 +134,23 @@ class MainActivity : AppCompatActivity(), ProductsListener {
                         .setTitle("Quieres hacerte premium por 5€?")
                         .setView(dialogView)
                         .setPositiveButton("Si") { _, _ ->
+                            CoroutineScope(Dispatchers.IO).launch {
+                                try {
+                                    RetrofitInstance.api.odoo(user.id)
 
+                                    runOnUiThread {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Gracias por suscribirte!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+
+                                    }
+                                } catch (e: HttpException) {
+                                    val errorBody = e.response()?.errorBody()?.string()
+                                    Log.e("Odoo", "Error HTTP ${e.code()}: $errorBody")
+                                }
+                            }
                         }
                         .setNegativeButton("Cancelar", null)
                         .show()

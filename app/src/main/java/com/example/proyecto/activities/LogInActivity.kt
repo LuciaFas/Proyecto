@@ -76,8 +76,9 @@ class LogInActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnCancel.setOnClickListener {
-            finish()
+        binding.btnRegister.setOnClickListener {
+            val intent = Intent(this@LogInActivity, RegisterActivity::class.java)
+            startActivity(intent)
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

@@ -48,11 +48,6 @@ class ModifyUserActivity : AppCompatActivity() {
 
             var correct = true
 
-            if (txtPassword.isEmpty()) {
-                binding.txtPassword.error = "La contraseña no puede estar vacia"
-                correct = false
-            }
-
             if (txtName.isEmpty()) {
                 binding.txtName.error = "El nombre no puede estar vacio"
                 correct = false
@@ -66,8 +61,11 @@ class ModifyUserActivity : AppCompatActivity() {
             if (correct) {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
+                        if (txtPassword.isNotEmpty()) {
+                            user.password = txtPassword
+                        }
+
                         user.name = txtName
-                        user.password = txtPassword
                         user.poblacion = txtLocation
 
                         val userMod = RetrofitInstance.api.modifyUser(user)
@@ -79,9 +77,17 @@ class ModifyUserActivity : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                            val intent = Intent(this@ModifyUserActivity, MainActivity::class.java)
-                            intent.putExtra("User", userMod)
-                            startActivity(intent)
+                            if (txtPassword.isEmpty()) {
+                                val intent = Intent(this@ModifyUserActivity, MainActivity::class.java)
+                                intent.putExtra("User", userMod)
+                                startActivity(intent)
+                            } else {
+                                val intent = Intent(this@ModifyUserActivity, LogInActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            }
+
                         }
                     } catch (e: HttpException) {
                         val errorBody = e.response()?.errorBody()?.string()

@@ -33,8 +33,11 @@ interface ApiGrupoAService {
     @GET("categorias")
     suspend fun listCategories(): List<Category>
 
+    @GET("report/pdf/account.report_invoice/{id}")
+    suspend fun odoo(@Path("id") productId: Int): Response<Void>
+
     @DELETE("productos/{id}")
-    suspend fun deleteProducto(@Path("id") productId: Int): Response<Void>
+    suspend fun deleteProducto(@Path("id") userId: Int): Response<Void>
 
     @GET("productos/filtrar")
     suspend fun listProductsCategory(
